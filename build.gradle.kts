@@ -20,12 +20,7 @@ repositories {
 }
 
 configurations.compileClasspath {
-    // Let Gradle pick the highest available version instead of strict pins
-    resolutionStrategy.capabilitiesResolution.withCapability("com.google.guava:guava") {
-        selectHighestVersion()
-    }
     resolutionStrategy {
-        // Force versions that satisfy ALL constraints
         force("com.google.code.gson:gson:2.11.0")
         force("com.google.guava:guava:33.3.1-jre")
         force("it.unimi.dsi:fastutil:8.5.15")
@@ -35,11 +30,9 @@ configurations.compileClasspath {
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 
-    // PlotSquared v7 — pinned directly, no BOM to avoid version constraint pollution
     compileOnly("com.intellectualsites.plotsquared:plotsquared-core:7.4.1") { isTransitive = false }
     compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit:7.4.1") { isTransitive = false }
 
-    // WorldGuard — exclude conflicting transitive deps since Paper/PlotSquared provide them
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.11") {
         exclude(group = "com.google.guava", module = "guava")
         exclude(group = "com.google.code.gson", module = "gson")
@@ -48,6 +41,16 @@ dependencies {
 }
 
 tasks {
+    // paperweight 2.x: reobfJar depends on jar automatically via the plugin.
+    // Just wire shadowJar -> reobfJar and make assemble depend on shadowJar.
+    shadowJar {
+        archiveClassifier.set("")
+    }
+
+    reobfJar {
+        dependsOn(jar)
+    }
+
     assemble {
         dependsOn(reobfJar)
     }
@@ -64,9 +67,5 @@ tasks {
         filesMatching("plugin.yml") {
             expand(props)
         }
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
     }
 }
