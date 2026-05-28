@@ -3,7 +3,8 @@ package dev.naruto.uFly.listener;
 import com.plotsquared.bukkit.player.BukkitPlayer;
 import com.plotsquared.core.events.PlotDeleteEvent;
 import com.plotsquared.core.events.PlayerEnterPlotEvent;
-import com.plotsquared.core.events.PlayerExitPlotEvent;
+import com.plotsquared.core.events.PlayerLeavePlotEvent;
+import com.plotsquared.core.player.PlotPlayer;
 import dev.naruto.uFly.UFlyPlugin;
 import dev.naruto.uFly.manager.FlyManager;
 import dev.naruto.uFly.model.FlySession;
@@ -13,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PlotListener implements Listener {
 
@@ -24,10 +26,17 @@ public class PlotListener implements Listener {
         this.flyManager = flyManager;
     }
 
+    /** Converts a PlotPlayer<?> to a Bukkit Player, or null if not a BukkitPlayer. */
+    private @Nullable Player toPlayer(@NotNull PlotPlayer<?> plotPlayer) {
+        if (plotPlayer instanceof BukkitPlayer bp) {
+            return bp.getPlatformPlayer();
+        }
+        return null;
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEnterPlot(@NotNull PlayerEnterPlotEvent event) {
-        if (!(event.getPlayer() instanceof BukkitPlayer bp)) return;
-        Player player = bp.getBukkitPlayer();
+        Player player = toPlayer(event.getPlotPlayer());
         if (player == null) return;
         if (flyManager.hasFlySession(player)) return;
         if (!plugin.getConfigManager().getBoolean("settings.auto-disable-on-exit")) return;
@@ -37,9 +46,8 @@ public class PlotListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onExitPlot(@NotNull PlayerExitPlotEvent event) {
-        if (!(event.getPlayer() instanceof BukkitPlayer bp)) return;
-        Player player = bp.getBukkitPlayer();
+    public void onLeavePlot(@NotNull PlayerLeavePlotEvent event) {
+        Player player = toPlayer(event.getPlotPlayer());
         if (player == null) return;
         FlySession session = flyManager.getSession(player);
         if (session == null) return;
@@ -56,8 +64,7 @@ public class PlotListener implements Listener {
             FlySession session = flyManager.getSession(player);
             if (session == null) continue;
             if (!session.worldName().equals(event.getPlot().getWorldName())) continue;
-            var ps = plugin.getHookManager().getPlotSquaredHook();
-            var currentPlot = ps.getPlotAt(player);
+            var currentPlot = plugin.getHookManager().getPlotSquaredHook().getPlotAt(player);
             if (currentPlot != null && currentPlot.getId().equals(event.getPlot().getId())) {
                 flyManager.disableFly(player, true);
             }
