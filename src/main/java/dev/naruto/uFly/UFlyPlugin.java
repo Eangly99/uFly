@@ -25,10 +25,13 @@ public final class UFlyPlugin extends JavaPlugin {
 
         this.flyManager = new FlyManager(this, configManager, hookManager);
 
+        // Register Bukkit events
         getServer().getPluginManager().registerEvents(new FlyListener(this, flyManager), this);
 
+        // Register PlotSquared events via its own EventDispatcher (NOT Bukkit's)
         if (hookManager.getPlotSquaredHook().isEnabled()) {
-            getServer().getPluginManager().registerEvents(new PlotListener(this, flyManager), this);
+            PlotListener plotListener = new PlotListener(this, flyManager);
+            hookManager.getPlotSquaredHook().getPlotAPI().registerListener(plotListener);
         }
 
         UFlyCommand cmd = new UFlyCommand(this, flyManager, configManager);

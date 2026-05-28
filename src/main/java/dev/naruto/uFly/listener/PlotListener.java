@@ -1,5 +1,6 @@
 package dev.naruto.uFly.listener;
 
+import com.google.common.eventbus.Subscribe;
 import com.plotsquared.bukkit.player.BukkitPlayer;
 import com.plotsquared.core.events.PlotDeleteEvent;
 import com.plotsquared.core.events.PlayerEnterPlotEvent;
@@ -10,13 +11,15 @@ import dev.naruto.uFly.manager.FlyManager;
 import dev.naruto.uFly.model.FlySession;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PlotListener implements Listener {
+/**
+ * Listens to PlotSquared events via its own EventDispatcher (@Subscribe).
+ * This class must NOT implement Bukkit Listener — register it via
+ * PlotAPI#registerListener() instead of Bukkit#getPluginManager().
+ */
+public class PlotListener {
 
     private final UFlyPlugin plugin;
     private final FlyManager flyManager;
@@ -26,7 +29,6 @@ public class PlotListener implements Listener {
         this.flyManager = flyManager;
     }
 
-    /** Converts a PlotPlayer<?> to a Bukkit Player, or null if not a BukkitPlayer. */
     private @Nullable Player toPlayer(@NotNull PlotPlayer<?> plotPlayer) {
         if (plotPlayer instanceof BukkitPlayer bp) {
             return bp.getPlatformPlayer();
@@ -34,7 +36,7 @@ public class PlotListener implements Listener {
         return null;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @Subscribe
     public void onEnterPlot(@NotNull PlayerEnterPlotEvent event) {
         Player player = toPlayer(event.getPlotPlayer());
         if (player == null) return;
@@ -45,7 +47,7 @@ public class PlotListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @Subscribe
     public void onLeavePlot(@NotNull PlayerLeavePlotEvent event) {
         Player player = toPlayer(event.getPlotPlayer());
         if (player == null) return;
@@ -58,7 +60,7 @@ public class PlotListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @Subscribe
     public void onPlotDelete(@NotNull PlotDeleteEvent event) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             FlySession session = flyManager.getSession(player);
