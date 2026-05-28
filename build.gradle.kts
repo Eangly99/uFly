@@ -15,23 +15,36 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.enginehub.org/repo/")
-    // IntellectualSites releases + snapshots (PlotSquared v7)
     maven("https://mvn.intellectualsites.com/content/repositories/releases/")
     maven("https://mvn.intellectualsites.com/content/repositories/snapshots/")
-    // Sonatype snapshots for PlotSquared transitive deps (guava, gson, fastutil etc.)
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+}
+
+configurations.compileClasspath {
+    // Let Gradle pick the highest available version instead of strict pins
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.guava:guava") {
+        selectHighestVersion()
+    }
+    resolutionStrategy {
+        // Force versions that satisfy ALL constraints
+        force("com.google.code.gson:gson:2.11.0")
+        force("com.google.guava:guava:33.3.1-jre")
+        force("it.unimi.dsi:fastutil:8.5.15")
+    }
 }
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 
-    // PlotSquared v7 via IntellectualSites BOM
-    compileOnly(platform("com.intellectualsites.bom:bom-newest:1.55"))
-    compileOnly("com.intellectualsites.plotsquared:plotsquared-core") { isTransitive = false }
-    compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit") { isTransitive = false }
+    // PlotSquared v7 — pinned directly, no BOM to avoid version constraint pollution
+    compileOnly("com.intellectualsites.plotsquared:plotsquared-core:7.4.1") { isTransitive = false }
+    compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit:7.4.1") { isTransitive = false }
 
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.11")
+    // WorldGuard — exclude conflicting transitive deps since Paper/PlotSquared provide them
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.11") {
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "com.google.code.gson", module = "gson")
+        exclude(group = "it.unimi.dsi", module = "fastutil")
+    }
 }
 
 tasks {
