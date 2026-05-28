@@ -42,13 +42,20 @@ public class FlyManager {
     }
 
     public @NotNull ToggleResult toggleFly(@NotNull Player player, boolean autoMode) {
-        if (!player.hasPermission("ufly.use")) return ToggleResult.DENIED_NO_PERMISSION;
-        if (!isWorldEnabled(player.getWorld().getName())) return ToggleResult.DENIED_WORLD;
-        if (hookManager.getCelestCombatHook().isInCombat(player)) return ToggleResult.DENIED_COMBAT;
-        if (!hookManager.getWorldGuardHook().canFly(player)) return ToggleResult.DENIED_REGION;
-        if (hookManager.getPlotSquaredHook().isEnabled()) {
-            if (!hookManager.getPlotSquaredHook().canFlyAtLocation(player)) return ToggleResult.DENIED_PLOT;
+        // OP bypass — skip all restriction checks
+        boolean op = player.isOp() || player.hasPermission("ufly.bypass");
+
+        if (!player.hasPermission("ufly.use") && !op) return ToggleResult.DENIED_NO_PERMISSION;
+
+        if (!op) {
+            if (!isWorldEnabled(player.getWorld().getName())) return ToggleResult.DENIED_WORLD;
+            if (hookManager.getCelestCombatHook().isInCombat(player)) return ToggleResult.DENIED_COMBAT;
+            if (!hookManager.getWorldGuardHook().canFly(player)) return ToggleResult.DENIED_REGION;
+            if (hookManager.getPlotSquaredHook().isEnabled()) {
+                if (!hookManager.getPlotSquaredHook().canFlyAtLocation(player)) return ToggleResult.DENIED_PLOT;
+            }
         }
+
         if (hasFlySession(player)) {
             disableFly(player, false);
             return ToggleResult.DISABLED;
@@ -103,6 +110,10 @@ public class FlyManager {
         FlySession session = getSession(player);
         if (session == null) return;
         if (!configManager.getBoolean("settings.auto-disable-on-exit")) return;
+
+        // OP/bypass players are never auto-disabled
+        if (player.isOp() || player.hasPermission("ufly.bypass")) return;
+
         if (!isWorldEnabled(player.getWorld().getName())) {
             disableFly(player, true);
             return;

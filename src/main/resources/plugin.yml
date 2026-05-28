@@ -1,33 +1,32 @@
 name: uFly
-version: '${version}'
+version: ${version}
 main: dev.naruto.uFly.UFlyPlugin
 api-version: '1.21'
-description: Plot-aware flight plugin powered by PlotSquared.
-authors: [naruto]
-soft-depend:
-  - PlotSquared
-  - CelestCombat-Pro
-  - WorldGuard
+authors: [Eangly99]
+description: A fly plugin with PlotSquared, WorldGuard and CelestCombat support.
 
 commands:
   ufly:
-    description: Toggle plot fly
-    usage: /ufly
+    description: Toggle fly
+    usage: /ufly [reload]
     permission: ufly.use
 
 permissions:
   ufly.use:
-    description: Base permission to toggle fly
-    default: false
-  ufly.claimed:
-    description: Fly on owned plots
-    default: false
-  ufly.trust:
-    description: Fly on trusted plots
-    default: false
-  ufly.all:
-    description: Fly in entire plot world
+    description: Allows the player to use /ufly
     default: op
   ufly.admin:
-    description: Admin commands (reload)
+    description: Allows /ufly reload
     default: op
+  ufly.bypass:
+    description: Bypass all fly restrictions (world, combat, region, plot)
+    default: op
+  ufly.claimed:
+    description: Allow fly on owned plots
+    default: true
+  ufly.trust:
+    description: Allow fly on trusted/member plots
+    default: true
+  ufly.all:
+    description: Allow fly anywhere in plot worlds
+    default: false
