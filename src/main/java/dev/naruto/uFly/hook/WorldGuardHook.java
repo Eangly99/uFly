@@ -5,7 +5,6 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import org.bukkit.Bukkit;
@@ -29,7 +28,6 @@ public class WorldGuardHook implements PluginHook {
     public void onEnable() {
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
             try {
-                // Access WorldGuard platform to verify it's properly loaded
                 WorldGuard.getInstance();
                 enabled = true;
                 plugin.getLogger().info("[uFly] WorldGuard hook enabled.");
@@ -40,13 +38,12 @@ public class WorldGuardHook implements PluginHook {
     }
 
     @Override
-    public void onDisable() {
-        enabled = false;
-    }
+    public void onDisable() { enabled = false; }
 
     /**
      * Returns true if WorldGuard allows flight at the player's location.
-     * Falls back to true (allow) if WorldGuard is not present or no explicit flag is set.
+     * Uses the BUILD flag as a proxy — if building is denied, flying is also denied.
+     * Falls back to true (allow) if WorldGuard is absent or no flag is set.
      */
     public boolean canFly(@NotNull Player player) {
         if (!enabled) return true;
@@ -55,9 +52,10 @@ public class WorldGuardHook implements PluginHook {
             RegionQuery query = container.createQuery();
             com.sk89q.worldedit.util.Location weLoc = BukkitAdapter.adapt(player.getLocation());
             com.sk89q.worldguard.LocalPlayer wgPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-            // Use PVP flag as a proxy; a dedicated FLY flag would require WorldGuard API extension.
-            // Here we check the standard FLY flag if available (WG 7+)
-            StateFlag.State state = query.queryState(weLoc, wgPlayer, Flags.FLY);
+            // WorldGuard 7.0.x does not ship a dedicated FLY flag.
+            // Use the BUILD flag: if a player cannot build in a region, deny fly as well.
+            StateFlag.State state = query.queryState(weLoc, wgPlayer, Flags.BUILD);
+            // BUILD flag returns null when no region covers the location — treat as allowed
             if (state == StateFlag.State.DENY) return false;
             return true;
         } catch (Exception e) {

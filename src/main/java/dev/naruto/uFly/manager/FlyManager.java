@@ -36,37 +36,25 @@ public class FlyManager {
         DENIED_WORLD
     }
 
-    /** Checks if the world is in the enabled list. Empty list = all worlds allowed. */
     public boolean isWorldEnabled(@NotNull String worldName) {
         List<String> enabled = configManager.getStringList("settings.enabled-worlds");
         return enabled.isEmpty() || enabled.contains(worldName);
     }
 
     public @NotNull ToggleResult toggleFly(@NotNull Player player, boolean autoMode) {
-        // 1. Base permission
-        if (!player.hasPermission("ufly.use")) return DENIED_NO_PERMISSION;
-
-        // 2. World check
-        if (!isWorldEnabled(player.getWorld().getName())) return DENIED_WORLD;
-
-        // 3. Combat check
-        if (hookManager.getCelestCombatHook().isInCombat(player)) return DENIED_COMBAT;
-
-        // 4. WorldGuard check
-        if (!hookManager.getWorldGuardHook().canFly(player)) return DENIED_REGION;
-
-        // 5. PlotSquared context
+        if (!player.hasPermission("ufly.use")) return ToggleResult.DENIED_NO_PERMISSION;
+        if (!isWorldEnabled(player.getWorld().getName())) return ToggleResult.DENIED_WORLD;
+        if (hookManager.getCelestCombatHook().isInCombat(player)) return ToggleResult.DENIED_COMBAT;
+        if (!hookManager.getWorldGuardHook().canFly(player)) return ToggleResult.DENIED_REGION;
         if (hookManager.getPlotSquaredHook().isEnabled()) {
-            if (!hookManager.getPlotSquaredHook().canFlyAtLocation(player)) return DENIED_PLOT;
+            if (!hookManager.getPlotSquaredHook().canFlyAtLocation(player)) return ToggleResult.DENIED_PLOT;
         }
-
-        // 6. Toggle
         if (hasFlySession(player)) {
             disableFly(player, false);
-            return DISABLED;
+            return ToggleResult.DISABLED;
         } else {
             enableFly(player, autoMode);
-            return ENABLED;
+            return ToggleResult.ENABLED;
         }
     }
 
@@ -115,14 +103,10 @@ public class FlyManager {
         FlySession session = getSession(player);
         if (session == null) return;
         if (!configManager.getBoolean("settings.auto-disable-on-exit")) return;
-
-        // If world is no longer enabled, disable fly immediately
         if (!isWorldEnabled(player.getWorld().getName())) {
             disableFly(player, true);
             return;
         }
-
-        // Plot check if enabled
         if (hookManager.getPlotSquaredHook().isEnabled()) {
             if (!hookManager.getPlotSquaredHook().canFlyAtLocation(player)) {
                 if (session.autoEnabled()) disableFly(player, true);
