@@ -67,6 +67,8 @@ public class UFlyCommand implements CommandExecutor, TabCompleter {
                 MessageUtil.sendChat(player, configManager.getMessage("region-denied"));
             case DENIED_PLOT ->
                 MessageUtil.sendChat(player, configManager.getMessage("no-permission"));
+            case DENIED_WORLD ->
+                MessageUtil.sendChat(player, configManager.getMessage("world-denied"));
         }
         return true;
     }

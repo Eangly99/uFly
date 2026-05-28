@@ -6,9 +6,13 @@ messages:
   in-combat: "<red>You cannot fly while in combat!"
   region-denied: "<red>Fly is restricted in this region."
   outside-plot: "<yellow>You left your plot. Fly has been disabled."
+  world-denied: "<red>Fly is disabled in this world."
 
 settings:
   actionbar-notifications: true
   auto-disable-on-exit: true
   allow-fly-in-road: false
   debug: false
+  enabled-worlds:
+    - world
+    - plotworld
