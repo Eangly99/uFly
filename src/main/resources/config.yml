@@ -1,0 +1,14 @@
+messages:
+  prefix: "<gradient:#00c6ff:#0072ff>[uFly]</gradient> "
+  fly-enabled: "<green>Fly enabled."
+  fly-disabled: "<red>Fly disabled."
+  no-permission: "<red>You don't have permission to fly here."
+  in-combat: "<red>You cannot fly while in combat!"
+  region-denied: "<red>Fly is restricted in this region."
+  outside-plot: "<yellow>You left your plot. Fly has been disabled."
+
+settings:
+  actionbar-notifications: true
+  auto-disable-on-exit: true
+  allow-fly-in-road: false
+  debug: false
