@@ -15,13 +15,18 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.enginehub.org/repo/")
-    maven("https://maven.plotsquared.com/")
+    // PlotSquared v7+ is published to Maven Central via IntellectualSites BOM
+    // No extra repo needed — mavenCentral() covers it
 }
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
-    compileOnly("com.plotsquared:PlotSquared-Core:7.3.9")
-    compileOnly("com.plotsquared:PlotSquared-Bukkit:7.3.9") { isTransitive = false }
+
+    // PlotSquared v7 — use BOM to manage versions automatically
+    compileOnly(platform("com.intellectualsites.bom:bom-newest:1.55"))
+    compileOnly("com.intellectualsites.plotsquared:plotsquared-core")
+    compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit") { isTransitive = false }
+
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.11")
 }
 
