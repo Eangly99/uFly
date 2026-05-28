@@ -15,16 +15,20 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.enginehub.org/repo/")
-    // PlotSquared v7+ is published to Maven Central via IntellectualSites BOM
-    // No extra repo needed — mavenCentral() covers it
+    // IntellectualSites releases + snapshots (PlotSquared v7)
+    maven("https://mvn.intellectualsites.com/content/repositories/releases/")
+    maven("https://mvn.intellectualsites.com/content/repositories/snapshots/")
+    // Sonatype snapshots for PlotSquared transitive deps (guava, gson, fastutil etc.)
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 
-    // PlotSquared v7 — use BOM to manage versions automatically
+    // PlotSquared v7 via IntellectualSites BOM
     compileOnly(platform("com.intellectualsites.bom:bom-newest:1.55"))
-    compileOnly("com.intellectualsites.plotsquared:plotsquared-core")
+    compileOnly("com.intellectualsites.plotsquared:plotsquared-core") { isTransitive = false }
     compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit") { isTransitive = false }
 
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.11")
