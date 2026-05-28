@@ -1,9 +1,7 @@
-import io.papermc.paperweight.util.constants.*
-
 plugins {
     java
-    id("io.papermc.paperweight.userdev") version "1.7.1"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.14"
+    id("com.gradleup.shadow") version "8.3.6"
 }
 
 group = "dev.naruto"
